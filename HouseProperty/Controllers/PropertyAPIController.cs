@@ -4,12 +4,14 @@ using HouseProperty.Data;
 using HouseProperty.Model;
 using HouseProperty.Model.DTO;
 using HouseProperty.Model.DTO.Property;
+using HouseProperty.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Runtime.InteropServices;
 
 namespace HouseProperty.Controllers
 {
@@ -17,67 +19,41 @@ namespace HouseProperty.Controllers
     [ApiController]
     public class PropertyAPIController : ControllerBase
     {
-        private readonly dbContext db;
+        protected APIResponse response;
+        private readonly IPropertyRepo repo;
         private readonly IMapper mapper;
 
-        public PropertyAPIController(dbContext _db, IMapper _mapper)
+        public PropertyAPIController(IPropertyRepo _repo, IMapper _mapper)
         {
-            db = _db;
+            repo = _repo;
             mapper = _mapper;
+            this.response = new APIResponse();
         }
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<PropertyDTO>>> GetProperties()
+        public async Task<ActionResult<APIResponse>> GetProperties()
         {
-            IEnumerable<Property> propertyList = await db.Properties.ToListAsync();
-            return Ok(mapper.Map<List<PropertyDTO>>(propertyList));
+            try
+            {
+                var propertyList = await repo.GetAllProperty();
+                response.Result = mapper.Map<List<PropertyDTO>>(propertyList);
+                response.StatusCode = HttpStatusCode.OK;
+                response.IsSuccess = true;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.ErrorMessage = new List<string>() { ex.Message };
+                return BadRequest(response);
+            }
         }
 
         [HttpGet("{id:int}", Name = "GetProperty")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public  async Task<ActionResult<PropertyDTO>> GetProperty(int id)
-        {
-            if (id == 0)
-            {
-                return BadRequest();
-            }
-            var property = await db.Properties.FirstOrDefaultAsync(a => a.Id == id);
-            if (property == null)
-            {
-                return NotFound();
-            }
-            return Ok(mapper.Map<PropertyDTO>(property));
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<PropertyDTO>> AddProperty([FromBody] PropertyDTOCreate obj)
-        {
-            if(await db.Properties.FirstOrDefaultAsync(a=>a.Name.ToLower() == obj.Name.ToLower()) != null){
-                ModelState.AddModelError("CustomError", "Name already exists");
-            }
-            if (obj == null)
-            {
-                return BadRequest();
-            }
-
-            Property model = mapper.Map<Property>(obj);
-
-            await db.Properties.AddAsync(model);
-            await db.SaveChangesAsync();
-
-            return CreatedAtRoute("GetProperty", new { id = model.Id }, model);
-        }
-
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpDelete("{id:int}", Name = "DeleteVilla")]
-        /*[Authorize(Roles = "admin")]*/
-        public async Task<ActionResult> DeleteVilla(int id)
+        public  async Task<ActionResult<APIResponse>> GetProperty(int id)
         {
             try
             {
@@ -85,29 +61,96 @@ namespace HouseProperty.Controllers
                 {
                     return BadRequest();
                 }
-                var villa = await db.Properties.FirstOrDefaultAsync(u => u.Id == id);
-                if (villa == null)
+                var property = await repo.GetProperty(a => a.Id == id);
+                if (property == null)
                 {
                     return NotFound();
                 }
-                db.Properties.Remove(villa);
-                await db.SaveChangesAsync();
-                return NoContent();
+                response.Result = mapper.Map<PropertyDTO>(property);
+                response.StatusCode = HttpStatusCode.OK;
+                response.IsSuccess = true;
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                /*_response.IsSuccess = false;
-                _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };*/
+                response.IsSuccess = false;
+                response.ErrorMessage = new List<string>() { ex.Message };
+                return BadRequest(response);
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<APIResponse>> AddProperty([FromBody] PropertyDTOCreate obj)
+        {
+            try
+            {
+                if (await repo.GetProperty(a => a.Name.ToLower() == obj.Name.ToLower()) != null)
+                {
+                    ModelState.AddModelError("CustomError", "Name already exists");
+                }
+                if (obj == null)
+                {
+                    return BadRequest();
+                }
+
+                Property model = mapper.Map<Property>(obj);
+
+                await repo.Create(model);
+                response.Result = mapper.Map<PropertyDTO>(model);
+                response.StatusCode = HttpStatusCode.Created;
+                response.IsSuccess = true;
+
+                return CreatedAtRoute("GetProperty", new { id = model.Id }, response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.ErrorMessage = new List<string>() { ex.Message };
+                return BadRequest(response);
+            }
+        }
+
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpDelete("{id:int}", Name = "DeleteProperty")]
+        public async Task<ActionResult> DeleteProperty(int id)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    return BadRequest();
+                }
+                var property = await repo.GetProperty(u => u.Id == id);
+                if (property == null)
+                {
+                    return NotFound();
+                }
+                await repo.Delete(property);
+
+                response.Result = property;
+                response.StatusCode = HttpStatusCode.NoContent;
+                response.IsSuccess = true;
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                response.ErrorMessage = new List<string>() { ex.Message };
+                return BadRequest(response);
 
             }
-            return NoContent();
         }
 
         [HttpPut("{id:int}", Name = "UpdateVilla")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<PropertyDTO>> UpdateVilla(int id, [FromBody] PropertyDTOUpdate obj)
+        public async Task<ActionResult<APIResponse>> UpdateVilla(int id, [FromBody] PropertyDTOUpdate obj)
         {
             try
             {
@@ -118,19 +161,20 @@ namespace HouseProperty.Controllers
 
                 Property model = mapper.Map<Property>(obj);
 
-                db.Properties.Update(model);
-                await db.SaveChangesAsync();
-                /*_response.StatusCode = HttpStatusCode.NoContent;
-                _response.IsSuccess = true;*/
-                return Ok();
+                await repo.Update(model);
+                
+                response.Result = model;
+                response.StatusCode = HttpStatusCode.NoContent;
+                response.IsSuccess= true;
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                /*_response.IsSuccess = false;
-                _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };*/
+                response.IsSuccess = false;
+                response.ErrorMessage = new List<string>() { ex.Message };
+                return BadRequest(response);
             }
-            return Ok();
         }
 
         [HttpPatch("{id:int}", Name = "UpdatePartialVilla")]
@@ -142,7 +186,7 @@ namespace HouseProperty.Controllers
             {
                 return BadRequest();
             }
-            var property = await db.Properties.FirstOrDefaultAsync(u => u.Id == id);
+            var property = await repo.GetProperty(u => u.Id == id, tracked:false);
 
             PropertyDTOUpdate propertyDTO = mapper.Map<PropertyDTOUpdate>(property);
 
@@ -159,7 +203,7 @@ namespace HouseProperty.Controllers
             {
                 return BadRequest(ModelState);
             }
-            await db.SaveChangesAsync();
+            await repo.Update(propertyModel);
             return NoContent();
         }
     }

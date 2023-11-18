@@ -1,5 +1,7 @@
 using HouseProperty;
 using HouseProperty.Data;
+using HouseProperty.Repository;
+using HouseProperty.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
+builder.Services.AddScoped<IPropertyRepo,PropertyRepo>();
 builder.Services.AddDbContext<dbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("sqlServerConnectionString"));
