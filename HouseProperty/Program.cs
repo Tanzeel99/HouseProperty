@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddScoped<IPropertyRepo,PropertyRepo>();
+builder.Services.AddScoped<IPropertyNumberRepo, PropertyNumberRepo>();
 builder.Services.AddDbContext<dbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("sqlServerConnectionString"));

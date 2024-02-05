@@ -8,18 +8,18 @@ using System.Runtime.InteropServices;
 
 namespace HouseProperty.Repository
 {
-    public class PropertyRepo : Repository<Property>, IPropertyRepo
+    public class PropertyNumberRepo : Repository<PropertyNumber>, IPropertyNumberRepo
     {
         private readonly dbContext db;
-        public PropertyRepo(dbContext _db) : base(_db)
+        public PropertyNumberRepo(dbContext _db) : base(_db)
         {
             db = _db;
         }
 
-        public async Task<Property> Update(Property entity)
+        public async Task<PropertyNumber> Update(PropertyNumber entity)
         {
             entity.UpdatedDate = DateTime.Now;
-            db.Properties.Update(entity);
+            db.PropertyNumbers.Update(entity);
             await db.SaveChangesAsync();
             return entity;
         }

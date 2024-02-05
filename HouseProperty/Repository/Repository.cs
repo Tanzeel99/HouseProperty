@@ -29,7 +29,7 @@ namespace HouseProperty.Repository
             await Save();
         }
 
-        public async Task<List<T>> GetAllProperty(Expression<Func<T, bool>>? filter = null)
+        public async Task<List<T>> GetAll(Expression<Func<T, bool>>? filter = null)
         {
             IQueryable<T> query = dbSet;
             if (filter != null)
@@ -37,7 +37,7 @@ namespace HouseProperty.Repository
             return await query.ToListAsync();
         }
 
-        public async Task<T> GetProperty(Expression<Func<T, bool>>? filter = null, bool tracked = true)
+        public async Task<T> Get(Expression<Func<T, bool>>? filter = null, bool tracked = true)
         {
             IQueryable<T> query = dbSet;
 

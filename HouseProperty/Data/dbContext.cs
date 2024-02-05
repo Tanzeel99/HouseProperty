@@ -7,6 +7,7 @@ namespace HouseProperty.Data
     {
         public dbContext(DbContextOptions<dbContext> option):base(option) { }
         public DbSet<Property> Properties { get; set; }
+        public DbSet<PropertyNumber> PropertyNumbers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

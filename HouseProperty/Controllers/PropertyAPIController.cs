@@ -35,7 +35,7 @@ namespace HouseProperty.Controllers
         {
             try
             {
-                var propertyList = await repo.GetAllProperty();
+                var propertyList = await repo.GetAll();
                 response.Result = mapper.Map<List<PropertyDTO>>(propertyList);
                 response.StatusCode = HttpStatusCode.OK;
                 response.IsSuccess = true;
@@ -61,7 +61,7 @@ namespace HouseProperty.Controllers
                 {
                     return BadRequest();
                 }
-                var property = await repo.GetProperty(a => a.Id == id);
+                var property = await repo.Get(a => a.Id == id);
                 if (property == null)
                 {
                     return NotFound();
@@ -81,13 +81,16 @@ namespace HouseProperty.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<APIResponse>> AddProperty([FromBody] PropertyDTOCreate obj)
         {
             try
             {
-                if (await repo.GetProperty(a => a.Name.ToLower() == obj.Name.ToLower()) != null)
+                if (await repo.Get(a => a.Name.ToLower() == obj.Name.ToLower()) != null)
                 {
                     ModelState.AddModelError("CustomError", "Name already exists");
+                    return BadRequest(ModelState);
                 }
                 if (obj == null)
                 {
@@ -125,7 +128,7 @@ namespace HouseProperty.Controllers
                 {
                     return BadRequest();
                 }
-                var property = await repo.GetProperty(u => u.Id == id);
+                var property = await repo.Get(u => u.Id == id);
                 if (property == null)
                 {
                     return NotFound();
@@ -186,7 +189,7 @@ namespace HouseProperty.Controllers
             {
                 return BadRequest();
             }
-            var property = await repo.GetProperty(u => u.Id == id, tracked:false);
+            var property = await repo.Get(u => u.Id == id, tracked:false);
 
             PropertyDTOUpdate propertyDTO = mapper.Map<PropertyDTOUpdate>(property);
 
