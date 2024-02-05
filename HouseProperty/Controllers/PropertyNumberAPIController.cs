@@ -48,7 +48,7 @@ namespace HouseProperty.Controllers
         }
 
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "GetPropertyNumber")]
         public async Task<ActionResult<APIResponse>> GetPropertyNumber(int id)
         {
             try
