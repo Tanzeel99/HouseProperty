@@ -11,7 +11,7 @@ using System.Net;
 
 namespace HouseProperty.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/PropertyNumber")]
     [ApiController]
     public class PropertyNumberAPIController : ControllerBase
     {
