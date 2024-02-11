@@ -1,0 +1,48 @@
+﻿@model IEnumerable<HousePropertyUI.Model.DTO.PropertyNumber.PropertyNumberDTO>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="Create" class="btn btn-outline-primary"><i class="bi bi-plus-square"></i> Create</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.PropertyNo)
+            </th>
+            <th>
+                Property
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SpecialDetails)
+            </th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PropertyNo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Property.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SpecialDetails)
+                </td>
+                <td>
+                    @Html.ActionLink("", "Edit", new { id = item.PropertyNo }, new { @class = "bi bi-pencil-square text-success" }) |
+                    @Html.ActionLink("", "Delete", new { id = item.PropertyNo }, new { @class = "bi bi-trash text-danger" })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

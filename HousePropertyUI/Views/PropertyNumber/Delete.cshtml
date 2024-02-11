@@ -1,0 +1,37 @@
+﻿@model HousePropertyUI.Models.VM.PropertyNumberViewModelDelete
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <hr />
+    <dl class="row">
+    </dl>
+    
+    <form asp-action="Delete">
+    <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PropertyNumber.PropertyNo)
+    </dt>
+    <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PropertyNumber.PropertyNo)
+    </dd>
+    <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PropertyNumber.PropertyID)
+    </dt>
+    <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PropertyNumber.PropertyID)
+    </dd>
+    <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.PropertyNumber.SpecialDetails)
+    </dt>
+    <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.PropertyNumber.SpecialDetails)
+    </dd>
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

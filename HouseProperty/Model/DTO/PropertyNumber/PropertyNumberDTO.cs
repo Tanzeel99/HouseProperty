@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HouseProperty.Model.DTO.Property;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HouseProperty.Model.DTO.PropertyNumber
@@ -12,5 +13,6 @@ namespace HouseProperty.Model.DTO.PropertyNumber
 
         [Required]
         public int PropertyID { get; set; }
+        public PropertyDTO Property { get; set; }
     }
 }

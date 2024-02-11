@@ -33,7 +33,8 @@ namespace HouseProperty.Controllers
         {
             try
             {
-                response.Result = await db.PropertyNumbers.ToListAsync();
+                IEnumerable<PropertyNumber> propertyNumberlist = await repo.GetAll(includeProperties: "Property");
+                response.Result = mapper.Map<List<PropertyNumberDTO>>(propertyNumberlist);
                 response.IsSuccess = true;
                 response.StatusCode = HttpStatusCode.OK;
 
@@ -86,7 +87,7 @@ namespace HouseProperty.Controllers
             {
                 if (await repo.Get(a => a.PropertyID == obj.PropertyNo) != null)
                 {
-                    ModelState.AddModelError("CustomError", "Property No already exists");
+                    ModelState.AddModelError("ErrorMessage", "Property No already exists");
                     return BadRequest(ModelState);
                 }
                 
@@ -97,7 +98,7 @@ namespace HouseProperty.Controllers
                 
                 if (await propertyRepo.Get(a => a.Id == obj.PropertyID) == null)
                 {
-                    ModelState.AddModelError("CustomError", "Property ID is Invalid");
+                    ModelState.AddModelError("ErrorMessage", "Property ID is Invalid");
                     return BadRequest(ModelState);
                 }
 
@@ -130,7 +131,7 @@ namespace HouseProperty.Controllers
 
                 if (await propertyRepo.Get(a => a.Id == obj.PropertyID) == null)
                 {
-                    ModelState.AddModelError("CustomError", "Property ID is Invalid");
+                    ModelState.AddModelError("ErrorMessage", "Property ID is Invalid");
                     return BadRequest(ModelState);
                 }
 

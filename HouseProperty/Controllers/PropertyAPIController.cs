@@ -89,7 +89,7 @@ namespace HouseProperty.Controllers
             {
                 if (await repo.Get(a => a.Name.ToLower() == obj.Name.ToLower()) != null)
                 {
-                    ModelState.AddModelError("CustomError", "Name already exists");
+                    ModelState.AddModelError("ErrorMessage", "Name already exists");
                     return BadRequest(ModelState);
                 }
                 if (obj == null)

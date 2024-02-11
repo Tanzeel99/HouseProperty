@@ -1,7 +1,9 @@
 ﻿using HousePropertyUI.Model;
 using HousePropertyUI.Services.IService;
 using HousePropertyUtility;
+using Humanizer;
 using Newtonsoft.Json;
+using System.Net;
 using System.Text;
 
 namespace HousePropertyUI.Services
@@ -52,9 +54,25 @@ namespace HousePropertyUI.Services
 
                 var apiContent = await apiResponseStream.Content.ReadAsStringAsync();
 
-                var apiResponse = JsonConvert.DeserializeObject<T>(apiContent);
-
-                return apiResponse;
+                try
+                {
+                    APIResponse APIResponse = JsonConvert.DeserializeObject<APIResponse>(apiContent);
+                    if(apiResponseStream.StatusCode == HttpStatusCode.BadRequest || apiResponseStream.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        APIResponse.StatusCode = HttpStatusCode.BadRequest;
+                        APIResponse.IsSuccess = false;
+                        var res = JsonConvert.SerializeObject(APIResponse);
+                        var apiResponse = JsonConvert.DeserializeObject<T>(res);
+                        return apiResponse;
+                    }
+                }
+                catch (Exception)
+                {
+                    var exceptionResponse = JsonConvert.DeserializeObject<T>(apiContent);
+                    return exceptionResponse;
+                }
+                var ApiResponse = JsonConvert.DeserializeObject<T>(apiContent);
+                return ApiResponse;
             }
             catch (Exception ex)
             {
